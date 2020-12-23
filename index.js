@@ -1,21 +1,23 @@
 //["id","parent","d"]
+//["ehhid", "d", "parent"]
 var input = [
-    { "i":1,"parent":0,"d":1},
-    { "i":2,"parent":1,"d":2},
-    { "i":3,"parent":1,"d":2,},
-    { "i":4,"parent":2,"d":3,},
-    { "i":5,"parent":2,"d":3,},
-    { "i":6,"parent":3,"d":3,},
-    { "i":7,"parent":5,"d":4,},
+  [ 1,0,1],
+  [2,1,2],
+  [3,1,2],
+  [4,2,3],
+  [5,2,3],
+  [6,3,3],
+  [7,5,4],
+  [8,1,2]
 ];
-function getObject (arr ,parent , output){
-    for(var j in arr){
-       if(arr[j].parent === parent){
-          output[arr[j].i] = {};
-          getObject(arr , arr[j].i ,output[arr[j].i]);
-       }
+function getObject (arr ,parent,output){
+  for(var j in arr){
+    if(arr[j][1] === parent){
+       output[arr[j][0]] = {};
+       getObject(arr,arr[j][0],output[arr[j][0]]);
     }
-    return output;
+  }
+  return output;
 }
 function start1(){
   console.log(getObject(input , 0 ,{}));
