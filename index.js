@@ -31,14 +31,26 @@ var Rinput = [
     [20, 5, "options", "3", "String", ".entity.quiz.maths.q2.options"],
     [21, 5, "options", "4", "String", ".entity.quiz.maths.q2.options"]
     ];
-function start1(){
-   
-   Array2Obj(input);
-}
+
 function start2(){
    
     Array2Obj(Rinput);
  }
+var x = {
+  abc:{
+     def:{jkl:{}},
+     ghi:{}
+  },
+}
+function getChildren(x){
+  console.log(x.abc);
+  var a = JSON.parse("x.abc");
+  console.log(a);
+  
+}  
+function start1(){
+   getChildren(x);
+}
 function Array2Obj(input){
     let value = {};
     base = input[0];
