@@ -1,80 +1,50 @@
-//["ehhid", "d", "parent"]
 var input = [
-  [ 1,0,1],
-  [2,1,2],
-  [3,1,2],
-  [4,2,3],
-  [5,2,3],
-  [6,3,3],
-  [7,5,4],
-  [8,1,2]
+  ["ehhid", "d", "parent", "entity", "typeOf", "path", "question", "answer"],
+  [1, 1, "entity", "quiz", "Object", ".entity"],
+  [2, 2, "quiz", "sport", "Object", ".entity.quiz"],
+  [3, 3, "sport", "q1", "Object", ".entity.quiz.sport", "Which one is correct team name in NBA?", "Huston Rocket"],
+  [4, 4, "q1", "options", "Array", ".entity.quiz.sport.q1"],
+  [5, 5, "options", "New York Bulls", "String", ".entity.quiz.sport.q1.options"],
+  [6, 5, "options", "Los Angeles Kings", "String", ".entity.quiz.sport.q1.options"],
+  [7, 5, "options", "Golden State Warriros", "String", ".entity.quiz.sport.q1.options"],
+  [8, 5, "options", "Huston Rocket", "String", ".entity.quiz.sport.q1.options"],
+  [9, 2, "quiz", "maths", "Object", ".entity.quiz"],
+  [10, 3, "maths", "q1", "Object", ".entity.quiz.maths", "5 + 7 = ?", "12"],
+  [11, 4, "q1", "options", "Array", ".entity.quiz.maths.q1"],
+  [12, 5, "options", "10", "String", ".entity.quiz.maths.q1.options"],
+  [13, 5, "options", "11", "String", ".entity.quiz.maths.q1.options"],
+  [14, 5, "options", "12", "String", ".entity.quiz.maths.q1.options"],
+  [15, 5, "options", "13", "String", ".entity.quiz.maths.q1.options"],
+  [16, 3, "maths", "q2", "Object", ".entity.quiz.maths", "12 - 8 = ?", "4"],
+  [17, 4, "q2", "options", "Array", ".entity.quiz.maths.q2"],
+  [18, 5, "options", "1", "String", ".entity.quiz.maths.q2.options"],
+  [19, 5, "options", "2", "String", ".entity.quiz.maths.q2.options"],
+  [20, 5, "options", "3", "String", ".entity.quiz.maths.q2.options"],
+  [21, 5, "options", "4", "String", ".entity.quiz.maths.q2.options"]
 ];
 function getObject (arr ,parent,output){
   for(var j in arr){
-    if(arr[j][1] === parent){
-       output[arr[j][0]] = {};
-       getObject(arr,arr[j][0],output[arr[j][0]]);
+    if(arr[j][2] === parent[3]&& arr[j][5].includes(parent[5]) && arr[j][1] === 1+ parent[1]){   
+      if(parent[4] === "Array" && arr[j][4] === "String"){
+        output.unshift(arr[j][3]);
+      }else if(arr[j][4] === "Object"){
+        output[arr[j][3]] = {};
+        if(arr[j].length > 6){
+          output[arr[j][3]][arr[0][6]] = arr[j][6];
+          output[arr[j][3]][arr[0][7]] = arr[j][7];
+        }
+      }else if(arr[j][4] === "Array"){
+        output[arr[j][3]] = [];
+      }
+      getObject(arr,arr[j],output[arr[j][3]]);
     }
+     
   }
-  return output;
+  var object = {};
+  object[arr[1][3]] = output;
+  return object;
 }
-function getMaxDepth(input){
-  var max = 0 ;
-  for(var i in input){
-      if(input[i][2] > max)
-          max = input[i][2];
-  }
-  return max;
+function start1(){
+  console.log("From getObject() ");
+  console.log(getObject(input,input[1],{}));
 }
-function  insertObject (object, parent , child) {
-  if (object.hasOwnProperty(parent)){
-    object[parent][child] = {};
-  }else{
-    for (let i = 0; i < Object.keys(object).length; i++) {
-      let value = object[Object.keys(object)[i]];
-      if (typeof value === "object") {
-          insertObject(object[Object.keys(object)[i]], parent , child)
-      }
-    }
-  }
-}
-function depthWise(input,output){
-  var depth = getMaxDepth(input);
-  for(var d = 1;d<=depth;d++){
-      for(var j in input){
-          if(input[j][2] === d){
-            if(d===1){
-              output[input[j][0]] = {}
-            }else{
-              insertObject(output , input[j][1], input[j][0]);
-            }
-          }
-      }
-  }
-  return output;
-}
-function arrayToTree(items ,parent){
-  const rootItems = [];
-  const lookup = {};
-  for (var i in items) {
-      var itemId   = items[i][0];
-      var parentId = items[i][1];
-      if (! lookup[itemId]) lookup[itemId] = {["id"]:itemId, ["children"]: [] }
-      const TreeItem = lookup[itemId];
-      if (parentId === parent ) {
-          rootItems.push(TreeItem);
-      }
-      else {
-          if (! lookup[parentId]) lookup[parentId] = { ["children"]: [] };
-          lookup[parentId]["children"].push(TreeItem);
-      }
-  }
-  return rootItems;
-}
- function start1(){
-   console.log("From getObject func() ");console.log(getObject(input,0,{}));
-   console.log("From arrayToTree() ");console.log(arrayToTree(input,0));
-    console.log("From depthWise()  ");console.log( depthWise(input,{}));
-}
-
-
