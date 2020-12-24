@@ -1,50 +1,160 @@
-var input = [
-  ["ehhid", "d", "parent", "entity", "typeOf", "path", "question", "answer"],
-  [1, 1, "entity", "quiz", "Object", ".entity"],
-  [2, 2, "quiz", "sport", "Object", ".entity.quiz"],
-  [3, 3, "sport", "q1", "Object", ".entity.quiz.sport", "Which one is correct team name in NBA?", "Huston Rocket"],
-  [4, 4, "q1", "options", "Array", ".entity.quiz.sport.q1"],
-  [5, 5, "options", "New York Bulls", "String", ".entity.quiz.sport.q1.options"],
-  [6, 5, "options", "Los Angeles Kings", "String", ".entity.quiz.sport.q1.options"],
-  [7, 5, "options", "Golden State Warriros", "String", ".entity.quiz.sport.q1.options"],
-  [8, 5, "options", "Huston Rocket", "String", ".entity.quiz.sport.q1.options"],
-  [9, 2, "quiz", "maths", "Object", ".entity.quiz"],
-  [10, 3, "maths", "q1", "Object", ".entity.quiz.maths", "5 + 7 = ?", "12"],
-  [11, 4, "q1", "options", "Array", ".entity.quiz.maths.q1"],
-  [12, 5, "options", "10", "String", ".entity.quiz.maths.q1.options"],
-  [13, 5, "options", "11", "String", ".entity.quiz.maths.q1.options"],
-  [14, 5, "options", "12", "String", ".entity.quiz.maths.q1.options"],
-  [15, 5, "options", "13", "String", ".entity.quiz.maths.q1.options"],
-  [16, 3, "maths", "q2", "Object", ".entity.quiz.maths", "12 - 8 = ?", "4"],
-  [17, 4, "q2", "options", "Array", ".entity.quiz.maths.q2"],
-  [18, 5, "options", "1", "String", ".entity.quiz.maths.q2.options"],
-  [19, 5, "options", "2", "String", ".entity.quiz.maths.q2.options"],
-  [20, 5, "options", "3", "String", ".entity.quiz.maths.q2.options"],
-  [21, 5, "options", "4", "String", ".entity.quiz.maths.q2.options"]
-];
-function getObject (arr ,parent,output){
-  for(var j in arr){
-    if(arr[j][2] === parent[3]&& arr[j][5].includes(parent[5]) && arr[j][1] === 1+ parent[1]){   
-      if(parent[4] === "Array" && arr[j][4] === "String"){
-        output.unshift(arr[j][3]);
-      }else if(arr[j][4] === "Object"){
-        output[arr[j][3]] = {};
-        if(arr[j].length > 6){
-          output[arr[j][3]][arr[0][6]] = arr[j][6];
-          output[arr[j][3]][arr[0][7]] = arr[j][7];
-        }
-      }else if(arr[j][4] === "Array"){
-        output[arr[j][3]] = [];
-      }
-      getObject(arr,arr[j],output[arr[j][3]]);
-    }
-     
-  }
-  var object = {};
-  object[arr[1][3]] = output;
-  return object;
+function getEntityType(entity) {
+    return Object.getPrototypeOf(entity).constructor.name;//entity.__proto__.constructor.name
 }
-function start1(){
-  console.log("From getObject() ");
-  console.log(getObject(input,input[1],{}));
+var row = new Array('ehhid', 'd', 'parent', 'entity', "typeOf", "path");
+
+class mutate { 
+
+    static fillEmptyDepth(input, output) {
+        // console.log("filling gap",input,output)
+        for (var j = 1; j <= output[0].length - input.length; j++) {
+            input.push("");
+        }
+        return input;
+    }
+    
+    //this function primarly check for the presence of a keys in any an array, if not present and options [ returns false and update and return position]
+    static validateNupdate(input, output) {
+
+        if (output[0].indexOf(input) === -1 && typeof input !== null && typeof input !== undefined) {
+            output[0].push(input);
+        }
+        // console.log(output[0], input);
+        return output;
+    }
+    static createRow(input, output, previousRow, currentKey, d, path) {
+        var id = output.length;
+        var newRow = [id, d, previousRow[3], currentKey, input?.constructor.name, path];
+        return newRow;
+    }
+
+    static updateRow(input, output, previousRow, currentRow, currentKey, d, path) {
+        mutate.fillEmptyDepth(currentRow, output)
+        // console.log("current Key in updation",currentKey,input,currentRow,previousRow)
+        //Adding the inputValue in the currentRow at the index of the currentKey, also deletes an empty space from before.
+        currentRow.splice(output[0].indexOf(currentKey), 1, input);
+        //  console.log("updated Row",currentRow)
+        return currentRow;
+    }
+    static setEntity(input, output, key) { 
+       var  outputType = getEntityType(output);
+      //  console.log(outputType);
+        switch (output?.constructor) { 
+            case Object:
+                output[key] = input[key];
+            case Array:
+                if (key) {
+                    output.push(input[key])
+                } else { 
+                    output.push(input);
+                }
+            case String:
+                default:
+        }
+
+        return output;
+    }
+    static Obj2(input, output, previousRow, currentRow, currentKey, d, path, parent) {
+        if (!previousRow) {
+            mutate.setEntity(row, output);
+            
+            previousRow = output[0];
+            //  parent = "root";
+          //  console.log(previousRow);
+            path = '';
+        };
+        if (!d) { var d = 0; }
+        d = d + 1;
+        switch (input?.constructor) {
+            case Object:
+                path = path + '.' + previousRow[3];
+                mutate.processObj(input, output, previousRow, currentRow, currentKey, d, path, previousRow[3]);
+            case Array:
+           
+                path = path + '.' + previousRow[3];
+                mutate.processArr(input, output, previousRow, currentRow, currentKey, d, path, previousRow[3]);
+            default:
+            // return
+        }
+        //  console.log(output)
+        return output;
+    }
+    static processObj(input, output, previousRow, currentRow, currentKey, d, path, parent) {
+        for (var key in input) {
+            if (!input.hasOwnProperty(key)) continue;
+            if (getEntityType(input[key]) === 'Object' || getEntityType(input[key]) === 'Array') {
+                // console.log(path)
+                var currentRow = mutate.createRow(input[key], output, previousRow, key, d, path, previousRow[3]);
+                mutate.setEntity(currentRow, output);
+                mutate.Obj2(input[key], output, currentRow, currentRow, currentKey, d, path, currentRow[3]);
+
+            } else if (getEntityType(input[key]) === 'String' || getEntityType(input[key]) === 'Function' || getEntityType(input[key]) === 'Boolean') {
+                mutate.validateNupdate(key, output);
+                mutate.updateRow(input[key], output, previousRow, previousRow, key, d, path);
+            } else {
+                //   console.log("errand", key, input[key],typeof key)
+            }
+        }
+        return output;
+    }
+    static processArr(input, output, previousRow, currentRow, currentKey, d, path, parent) {
+        for (var i = 0; i < input.length; i++) {
+            if (typeof input[i] === "object" && input[i] !== null) {
+                if (typeof currentRow[3] === 'undefined') {
+                    //      console.log(currentRow)   
+                    
+                    mutate.updateRow(currentKey, output, previousRow, currentRow, 'root', d, path);
+                    console.log("Finding Array Values", previousRow)
+                } else {
+                    console.log("Finding Array Values",currentRow)
+
+                    var currentRow = mutate.createRow(input[i], output, previousRow, previousRow[3] + i, d, path);
+                    mutate.setEntity(currentRow, output);
+//                    output.push(currentRow);
+                }
+                mutate.Obj2(input[i], output, currentRow, currentRow, currentKey, d, path);
+
+            } else {
+                //creating Value Row for Array Parent
+                var currentRow = mutate.createRow(input[i], output, previousRow, input[i], d, path);
+                mutate.setEntity(currentRow, output);
+           //     console.log(currentRow)
+              //  output.push(currentRow);
+            }
+        }
+        return output
+    }
+    static arr2Object (arr ,parent,output){
+        for(var j in arr){
+          if(arr[j][2] === parent[3]&& arr[j][5].includes(parent[5]) && arr[j][1] === 1+ parent[1]){   
+            if(parent[4] === "Array" && arr[j][4] === "String"){
+              output.unshift(arr[j][3]);
+            }else if(arr[j][4] === "Object"){
+              output[arr[j][3]] = {};
+              if(arr[j].length > 6){
+                output[arr[j][3]][arr[0][6]] = arr[j][6];
+                output[arr[j][3]][arr[0][7]] = arr[j][7];
+              }
+            }else if(arr[j][4] === "Array"){
+              output[arr[j][3]] = [];
+            }
+            this.arr2Object(arr,arr[j],output[arr[j][3]]);
+          }
+           
+        }
+        var object = {};
+        object[arr[1][3]] = output;
+        return object;
+      }
+}
+
+function start1() {
+    var input = sample;
+    console.log("Input:- Object To Array");
+    console.log(input);
+    var outputArray = mutate.Obj2(input, []);
+    console.log("output Array[Input:- Array To Object] ", outputArray);
+    var outputJson = mutate.arr2Object(outputArray,outputArray[1] ,{});
+    console.log("Output :- Array To Object");
+    console.log(outputJson);
 }
