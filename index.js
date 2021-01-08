@@ -124,37 +124,40 @@ class mutate {
         }
         return output
     }
-    static arr2Object (arr ,parent,output){
-        for(var j in arr){
-          if(arr[j][2] === parent[3]&& arr[j][5].includes(parent[5]) && arr[j][1] === 1+ parent[1]){   
-            if(parent[4] === "Array" && arr[j][4] === "String"){
-              output.unshift(arr[j][3]);
-            }else if(arr[j][4] === "Object"){
-              output[arr[j][3]] = {};
-              if(arr[j].length > 6){
-                output[arr[j][3]][arr[0][6]] = arr[j][6];
-                output[arr[j][3]][arr[0][7]] = arr[j][7];
-              }
-            }else if(arr[j][4] === "Array"){
-              output[arr[j][3]] = [];
+    static arr2Object (input ,parent,output){
+        for(var j in input){
+          if(input[j][2] === parent[3]&&((input[j][5].includes(parent[5]) && input[j][1] === 1+ parent[1])||(input[j][1]===1&&parent[1]==="d"))){
+            if(parent[4] === "Array" && input[j][4] === "String"){
+              output.unshift(input[j][3]);
+            }else if(input[j][4] === "Object"){
+                var obj = {};
+                if(input[j].length > 6){
+                    for(var k = 6;k < input[j].length;k++){
+                        if(input[j][k] !== "")
+                            obj[input[0][k]] = input[j][k];
+                    }
+                }
+                if(parent[4]=== "Array")
+                        output.unshift(obj);
+                else
+                        output[input[j][3]] = obj;
+            }else if(input[j][4] === "Array"){
+              output[input[j][3]] = [];
             }
-            this.arr2Object(arr,arr[j],output[arr[j][3]]);
+            this.arr2Object(input,input[j],output[input[j][3]]);
           }
-           
         }
-        var object = {};
-        object[arr[1][3]] = output;
-        return object;
+        return output;
       }
 }
 
 function start1() {
-    var input = sample;
+    var input = schema1;
     console.log("Input:- Object To Array");
     console.log(input);
     var outputArray = mutate.Obj2(input, []);
     console.log("output Array[Input:- Array To Object] ", outputArray);
-    var outputJson = mutate.arr2Object(outputArray,outputArray[1] ,{});
+    var outputJson = mutate.arr2Object(outputArray,outputArray[0] ,{});
     console.log("Output :- Array To Object");
     console.log(outputJson);
 }
