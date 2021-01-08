@@ -88,7 +88,7 @@ class mutate {
                 mutate.setEntity(currentRow, output);
                 mutate.Obj2(input[key], output, currentRow, currentRow, currentKey, d, path, currentRow[3]);
 
-            } else if (getEntityType(input[key]) === 'String' || getEntityType(input[key]) === 'Function' || getEntityType(input[key]) === 'Boolean') {
+            } else if (getEntityType(input[key]) === 'String' || getEntityType(input[key]) === 'Function' || getEntityType(input[key]) === 'Boolean'|| getEntityType(input[key])=== 'Number') {
                 mutate.validateNupdate(key, output);
                 mutate.updateRow(input[key], output, previousRow, previousRow, key, d, path);
             } else {
