@@ -17,7 +17,9 @@ class mutate {
     static validateNupdate(input, output) {
 
         if (output[0].indexOf(input) === -1 && typeof input !== null && typeof input !== undefined) {
-            output[0].push(input);
+           console.log("Input " + input);
+           output[0].push(input);
+           console.log("Output " + output[0]);
         }
         // console.log(output[0], input);
         return output;
