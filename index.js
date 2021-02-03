@@ -154,7 +154,7 @@ class mutate {
 }
 
 function start1() {
-    var input = schema1;
+    var input = sample;
     console.log("Input:- Object To Array");
     console.log(input);
     var outputArray = mutate.Obj2(input, []);
